@@ -2,6 +2,7 @@ import React from "react";
 
 import "./style/flowchart_builder_canvas.css";
 import FlowchartBlock from "./FlowchartBlock";
+import {TM_FB_CANVAS_HEIGHT, TM_FB_CANVAS_UNIT, TM_FB_CANVAS_WIDTH} from "../../Constants";
 
 /**
  * The handler for the canvas position. This class is responsible for
@@ -146,7 +147,6 @@ export default class FlowchartBuilderCanvas extends React.Component<any, {
      * Callback run whenever the FlowchartBuilderCanvas is appended to the DOM.
      */
     componentDidMount() : void {
-        /* Canvas size is 50000px (check CSS) */
         this.canvasContainerElement = document.querySelector("#tmFBCanvasContainer");
         this.canvasElement = document.querySelector("#tmFBCanvas");
         this.positionHandler = new FlowchartBuilderCanvasPositionHandler(this);
@@ -160,7 +160,16 @@ export default class FlowchartBuilderCanvas extends React.Component<any, {
         });
 
         this.setState({
-            blocks: [...this.state.blocks, <FlowchartBlock key={this.state.blocks.length}/>]
+            blocks: [
+                ...this.state.blocks,
+                <FlowchartBlock key={this.state.blocks.length}/>,
+                <FlowchartBlock
+                    key={this.state.blocks.length + 1}
+                    width={12}
+                    x={6}
+                    y={11}
+                />
+            ]
         });
     }
 
@@ -172,16 +181,14 @@ export default class FlowchartBuilderCanvas extends React.Component<any, {
     render(): JSX.Element {
         return <FlowchartBuilderCanvasContext.Provider value={this}>
             <div id="tmFBCanvasContainer">
-                <div id="tmFBCanvas">
+                <div
+                    id="tmFBCanvas"
+                    style={{
+                        width: TM_FB_CANVAS_WIDTH,
+                        height: TM_FB_CANVAS_HEIGHT
+                    }}
+                >
                     { ...this.state.blocks }
-                    <div style={{
-                        backgroundColor: "blue",
-                        width: "100px",
-                        height: "100px",
-                        position: "relative",
-                        top: "10px",
-                        left: "10px"
-                    }} />
                 </div>
             </div>
         </FlowchartBuilderCanvasContext.Provider>;
@@ -201,8 +208,8 @@ export default class FlowchartBuilderCanvas extends React.Component<any, {
      */
     translateCoordinates(x : number, y : number) : { x: number, y: number } {
         return {
-            x: (this.canvasElement.clientWidth / 2) + (Math.floor(x) * 100),
-            y: (this.canvasElement.clientHeight / 2) + (Math.floor(y) * 100)
+            x: (this.canvasElement.clientWidth / 2) + (Math.floor(x) * TM_FB_CANVAS_UNIT),
+            y: (this.canvasElement.clientHeight / 2) + (Math.floor(y) * TM_FB_CANVAS_UNIT)
         };
     }
 
@@ -221,8 +228,8 @@ export default class FlowchartBuilderCanvas extends React.Component<any, {
      */
     translatePosition(x : number, y: number) : { x: number, y: number } {
         return {
-            x: Math.floor(x / 100) - (this.canvasElement.clientWidth / 2 / 100),
-            y: Math.floor(y / 100) - (this.canvasElement.clientHeight / 2 / 100)
+            x: Math.floor(x / TM_FB_CANVAS_UNIT) - (this.canvasElement.clientWidth / 2 / TM_FB_CANVAS_UNIT),
+            y: Math.floor(y / TM_FB_CANVAS_UNIT) - (this.canvasElement.clientHeight / 2 / TM_FB_CANVAS_UNIT)
         };
     }
 

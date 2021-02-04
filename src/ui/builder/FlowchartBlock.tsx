@@ -1,5 +1,11 @@
 import React from "react";
 import FlowchartBuilderCanvas, { FlowchartBuilderCanvasContext } from "./FlowchartBuilderCanvas";
+import {
+    TM_FB_BLOCK_DEFAULT_HEIGHT, TM_FB_BLOCK_DEFAULT_WIDTH,
+    TM_FB_BLOCK_DEFAULT_X,
+    TM_FB_BLOCK_DEFAULT_Y,
+    TM_FB_CANVAS_UNIT
+} from "../../Constants";
 
 /**
  * The FlowchartBlockTransform handles the flowchart's transforms, i.e.
@@ -100,8 +106,16 @@ class FlowchartBlockTransform {
  */
 class FlowchartBlockTransformHandler {
 
-    /** Whether or not the block is currently being dragged. */
-    dragging : boolean = false;
+    /** @returns Whether or not the block is currently being dragged. */
+    get dragging() : boolean {
+        return this.block.state.dragging;
+    }
+    /** @param dragging Whether or not the block is currently being dragged. */
+    set dragging(dragging : boolean) {
+        this.block.setState({
+            dragging: dragging
+        });
+    }
     /** @returns The flowchart block's transform class. */
     get transform() : FlowchartBlockTransform {
         return this.block.state.transform;
@@ -110,6 +124,11 @@ class FlowchartBlockTransformHandler {
     get canvas(): FlowchartBuilderCanvas {
         return this.block.canvas;
     }
+
+    /** The click's X position relative to the top-left corner of the block in units. */
+    clickRelativeX : number;
+    /** The click's Y position relative to the top-left corner of the block in units. */
+    clickRelativeY : number;
 
     /**
      * Creates a new FlowchartBlockTransformHandler
@@ -120,11 +139,17 @@ class FlowchartBlockTransformHandler {
         const { element: blockElement } = block;
 
         blockElement.addEventListener("mousedown", (event) => {
-            if (event.target === blockElement)
+            if (event.target === blockElement) {
                 this.dragging = true;
+
+                const blockRect = blockElement.getBoundingClientRect();
+                this.clickRelativeX = Math.floor((event.clientX - blockRect.left) / 25);
+                this.clickRelativeY = Math.floor((event.clientY - blockRect.top) / 25);
+            }
         });
         blockElement.addEventListener("tm_fb_canvas:mouseup", () => {
             this.dragging = false;
+            block.setState(block.state);
         });
         blockElement.addEventListener("tm_fb_canvas:mousemove", (event : MouseEvent) => {
             if (this.dragging) {
@@ -136,7 +161,10 @@ class FlowchartBlockTransformHandler {
                 const actualPosition = this.canvas.translatePosition(mouseRelativeX, mouseRelativeY);
 
                 if (actualPosition.x !== this.transform.x || actualPosition.y !== this.transform.y) {
-                    this.updateLocation(actualPosition.x, actualPosition.y);
+                    this.updateLocation(
+                        actualPosition.x - this.clickRelativeX,
+                        actualPosition.y - this.clickRelativeY
+                    );
                 }
             }
         });
@@ -181,16 +209,20 @@ class FlowchartBlockTransformHandler {
  * A FlowchartBlock is a block inside of the {@link FlowchartBuilderCanvas}. Together
  * with connections, they form the only components of a canvas.
  */
-export default class FlowchartBlock extends React.Component<any, {
-    transform: FlowchartBlockTransform;
-}> {
+export default class FlowchartBlock extends React.Component<
+    Partial<Pick<FlowchartBlockTransform, "width" | "height" | "x" | "y">>,
+    {
+        transform: FlowchartBlockTransform;
+        dragging: boolean;
+    }
+> {
 
     /** The block tracking ID. Used exclusively for element tracking. */
-    trackingId : number;
+    trackingId : number = Math.floor(Math.random() * 10000000);
     /** The canvas that this block is a part of. */
     canvas : FlowchartBuilderCanvas;
     /** The movement handler responsible for this block. */
-    movementHandler : FlowchartBlockTransformHandler;
+    transformHandler : FlowchartBlockTransformHandler;
     /** The rendered block element. */
     element : HTMLElement;
 
@@ -199,15 +231,17 @@ export default class FlowchartBlock extends React.Component<any, {
      *
      * @param props JSX properties.
      */
-    constructor(props : Record<string, any>) {
+    constructor(props : Partial<Pick<FlowchartBlockTransform, "width" | "height" | "x" | "y">>) {
         super(props);
+
         this.state = {
             transform: new FlowchartBlockTransform({
-                width: 1,
-                height: 1,
-                x: 0,
-                y: 0
-            })
+                width: props.width ?? TM_FB_BLOCK_DEFAULT_WIDTH,
+                height: props.height ?? TM_FB_BLOCK_DEFAULT_HEIGHT,
+                x: props.x ?? TM_FB_BLOCK_DEFAULT_X,
+                y: props.y ?? TM_FB_BLOCK_DEFAULT_Y
+            }),
+            dragging: false
         };
     }
 
@@ -216,7 +250,10 @@ export default class FlowchartBlock extends React.Component<any, {
      */
     componentDidMount() : void {
         this.element = document.querySelector(`#tmFBBlock__${this.trackingId}`);
-        this.movementHandler = new FlowchartBlockTransformHandler(this);
+        this.transformHandler = new FlowchartBlockTransformHandler(this);
+
+        this.trackingId = null;
+        this.element.removeAttribute("id");
     }
 
     /**
@@ -225,7 +262,6 @@ export default class FlowchartBlock extends React.Component<any, {
      * @returns The rendered block.
      */
     render(): JSX.Element {
-        this.trackingId = Math.floor(Math.random() * 10000000);
         return <FlowchartBuilderCanvasContext.Consumer>{
             context => {
                 this.canvas = context;
@@ -236,18 +272,19 @@ export default class FlowchartBlock extends React.Component<any, {
                 );
 
                 return <div
-                    id={`tmFBBlock__${this.trackingId}`}
+                    id={this.trackingId && `tmFBBlock__${this.trackingId}`}
                     data-width={this.state.transform.width}
                     data-height={this.state.transform.height}
                     data-x={this.state.transform.x}
                     data-y={this.state.transform.y}
+                    className="tm-fb-block"
                     style={{
-                        position: "relative",
-                        width: this.state.transform.width * 100,
-                        height: this.state.transform.height * 100,
+                        position: "absolute",
+                        width: this.state.transform.width * TM_FB_CANVAS_UNIT,
+                        height: this.state.transform.height * TM_FB_CANVAS_UNIT,
                         top: `${top}px`,
                         left: `${left}px`,
-                        backgroundColor: "red"
+                        cursor: (this.state.dragging) ? "move" : "initial"
                     }}
                 >
                     {this.props.children}

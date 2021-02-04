@@ -7,9 +7,6 @@
 }
 
 #tmFBCanvas {
-    height: 50000px;
-    width: 50000px;
-
     --tm-fb-scale: 1;
     transform: translate(-50%, -50%) scale(var(--tm-fb-scale));
 
@@ -29,4 +26,9 @@
 #tmFBCanvas > *,
 #tmFBCanvas:active > * {
     cursor: initial;
+}
+
+#tmFBCanvas .tm-fb-block {
+    background-color: #ccccccbb;
+    border-radius: 10px;
 }
