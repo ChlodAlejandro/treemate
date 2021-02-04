@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "module": "commonjs",
+        "target": "es5",
+        "outDir": "./build",
+        "resolveJsonModule": true,
+        "jsx": "react",
+        "esModuleInterop": true,
+        "lib": ["dom"],
+        "sourceMap": true,
+        "baseUrl": "./"
+    },
+    "include": [
+        "./src/**/*.ts",
+        "./src/**/*.tsx"
+    ],
+    "exclude": [
+        "./**/node_modules"
+    ]
+}

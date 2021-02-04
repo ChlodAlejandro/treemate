@@ -1,0 +1,18 @@
+# IDEs
+.vscode
+.vs
+.idea
+
+# System files
+desktop.ini
+Thumbs.db
+.DS_Store
+
+# Dependencies
+node_modules/
+
+# Build results
+build/
+
+# Caches
+.eslintcache

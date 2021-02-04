@@ -1,0 +1,32 @@
+#tmFBCanvasContainer {
+    height: 100%;
+    width: 100%;
+
+    background-color: var(--gray-100);
+    overflow: hidden;
+}
+
+#tmFBCanvas {
+    height: 50000px;
+    width: 50000px;
+
+    --tm-fb-scale: 1;
+    transform: translate(-50%, -50%) scale(var(--tm-fb-scale));
+
+    background-image: var(--tm-fb-canvas-image);
+    background-repeat: repeat;
+
+    position: relative;
+    cursor: grab;
+
+    box-shadow: inset 0 0 0 3px red;
+}
+
+#tmFBCanvas:active {
+    cursor: grabbing;
+}
+
+#tmFBCanvas > *,
+#tmFBCanvas:active > * {
+    cursor: initial;
+}
