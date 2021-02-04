@@ -12,6 +12,7 @@
         "css-loader": "^5.0.1",
         "eslint": "^7.19.0",
         "eslint-plugin-import": "^2.22.1",
+        "eslint-plugin-jsdoc": "^31.6.0",
         "eslint-plugin-react": "^7.22.0",
         "eslint-plugin-react-hooks": "^4.2.0",
         "file-loader": "^6.2.0",

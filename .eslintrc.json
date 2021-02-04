@@ -6,11 +6,15 @@
         "node": false,
         "browser": true
     },
+    "plugins": [
+        "jsdoc"
+    ],
     "extends": [
         "plugin:@typescript-eslint/recommended",
         "plugin:import/errors",
         "plugin:import/warnings",
-        "plugin:import/typescript"
+        "plugin:import/typescript",
+        "plugin:jsdoc/recommended"
     ],
     "parserOptions": {
         "ecmaVersion": 2020,
@@ -21,8 +25,23 @@
     "rules": {
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-inferrable-types": "off",
-        "semi": ["error", "always"],
         "@typescript-eslint/no-unused-vars": "warn",
+        "import/no-unresolved": "off",
+        "jsdoc/require-returns-type": "off",
+        "jsdoc/require-param-type": "off",
+        "jsdoc/require-jsdoc": [
+            "error",
+            {
+                "contexts":
+                [
+                    "ClassDeclaration",
+                    "ClassProperty",
+                    "FunctionDeclaration",
+                    "MethodDefinition"
+                ]
+            }
+        ],
+        "semi": ["error", "always"],
         "camelcase": "warn",
         "prefer-const": [
             "error",
@@ -32,8 +51,7 @@
         ],
         "space-before-blocks": "warn",
         "key-spacing": "warn",
-        "keyword-spacing": "warn",
-        "import/no-unresolved": "off"
+        "keyword-spacing": "warn"
     },
     "settings": {
         "import/parsers": { "@typescript-eslint/parser": [".ts", ".tsx"] }

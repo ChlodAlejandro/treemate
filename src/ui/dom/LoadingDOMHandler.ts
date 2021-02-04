@@ -1,6 +1,12 @@
+/**
+ * Handles the loading overlay, which is in the HTML file instead of in the app.
+ */
 export default class LoadingDOMHandler {
 
-    static hideLoadingOverlay() {
+    /**
+     * Hides the loading overlay from view, and removes it when the closing animation finishes.
+     */
+    static hideLoadingOverlay() : void {
         document.body.classList.remove("tm-loading");
 
         document.getElementById("tmLoadingOverlay")

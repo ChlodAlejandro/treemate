@@ -7,8 +7,17 @@ import ListItemText from "@material-ui/core/ListItemText";
 import Divider from "@material-ui/core/Divider";
 import Drawer from "@material-ui/core/Drawer";
 
+/**
+ * The FlowchartBuilderToolbox contains flowchart details and flowchart
+ * blocks which can be edited or dragged onto the canvas (hopefully).
+ */
 export default class FlowchartBuilderToolbox extends React.Component<any, any> {
 
+    /**
+     * Renders the toolbox.
+     *
+     * @returns The rendered toolbox.
+     */
     render() : JSX.Element {
         return <FlowchartBuilder.Context.Consumer>
             {
