@@ -29,6 +29,37 @@
 }
 
 #tmFBCanvas .tm-fb-block {
+    position: absolute;
     background-color: #ccccccbb;
     border-radius: 10px;
+}
+
+#tmFBCanvas .tm-fb-port {
+    position: absolute;
+    background-color: #09a9c8ee;
+
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+
+    text-transform: uppercase;
+    font-size: x-small;
+    line-height: 1em;
+
+    user-select: none;
+    cursor: grab;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    transition: background-color 0.2s ease-in-out;
+}
+
+#tmFBCanvas .tm-fb-port:hover {
+    background-color: #09a9c8;
+}
+
+#tmFBCanvas .tm-fb-port:active {
+    cursor: grabbing;
 }

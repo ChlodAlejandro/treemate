@@ -1,11 +1,13 @@
-import React from "react";
+import React, { Fragment } from "react";
 import FlowchartBuilderCanvas, { FlowchartBuilderCanvasContext } from "./FlowchartBuilderCanvas";
 import {
+    BlockSide,
     TM_FB_BLOCK_DEFAULT_HEIGHT, TM_FB_BLOCK_DEFAULT_WIDTH,
     TM_FB_BLOCK_DEFAULT_X,
     TM_FB_BLOCK_DEFAULT_Y,
     TM_FB_CANVAS_UNIT
 } from "../../Constants";
+import FlowchartBlockPort, {FlowchartBlockPortProps} from "./FlowchartBlockPort";
 
 /**
  * The FlowchartBlockTransform handles the flowchart's transforms, i.e.
@@ -142,6 +144,8 @@ class FlowchartBlockTransformHandler {
             if (event.target === blockElement) {
                 this.dragging = true;
 
+                // Store starting click-relative values, or else the box's top-left corner
+                // will jump to the mouse's position immediately.
                 const blockRect = blockElement.getBoundingClientRect();
                 this.clickRelativeX = Math.floor((event.clientX - blockRect.left) / 25);
                 this.clickRelativeY = Math.floor((event.clientY - blockRect.top) / 25);
@@ -213,6 +217,7 @@ export default class FlowchartBlock extends React.Component<
     Partial<Pick<FlowchartBlockTransform, "width" | "height" | "x" | "y">>,
     {
         transform: FlowchartBlockTransform;
+        ports: FlowchartBlockPortProps[];
         dragging: boolean;
     }
 > {
@@ -226,22 +231,68 @@ export default class FlowchartBlock extends React.Component<
     /** The rendered block element. */
     element : HTMLElement;
 
+    /** @returns The width of the block in pixels */
+    get actualWidth() : number {
+        return this.state.transform.width * TM_FB_CANVAS_UNIT;
+    }
+    /** @returns The height of the block in pixels */
+    get actualHeight() : number {
+        return this.state.transform.height * TM_FB_CANVAS_UNIT;
+    }
+
+    /**
+     * Generates the default ports for a block (1 inlet at the top middle,
+     * 1 outlet at the bottom middle).
+     *
+     * @param block The flowchart block to create ports for.
+     * @returns The ports of the given block.
+     */
+    static generateDefaultPorts(block : FlowchartBlock) : FlowchartBlockPortProps[] {
+        return [
+            {
+                block: block,
+                direction: "in",
+                side: BlockSide.Top,
+                sidePosition: Math.floor(block.state.transform.width / 2),
+                children: <Fragment>In</Fragment>
+            },
+            {
+                block: block,
+                direction: "out",
+                side: BlockSide.Bottom,
+                sidePosition: Math.floor(block.state.transform.width / 2),
+                children: <Fragment>Out</Fragment>
+            }
+        ];
+    }
+
     /**
      * Creates a new FlowchartBlock
      *
      * @param props JSX properties.
      */
-    constructor(props : Partial<Pick<FlowchartBlockTransform, "width" | "height" | "x" | "y">>) {
+    constructor(props : Partial<
+        Pick<FlowchartBlockTransform, "width" | "height" | "x" | "y"> & {
+            ports: FlowchartBlockPortProps[]
+        }
+    >) {
         super(props);
 
         this.state = {
+            // TODO Load from data
             transform: new FlowchartBlockTransform({
                 width: props.width ?? TM_FB_BLOCK_DEFAULT_WIDTH,
                 height: props.height ?? TM_FB_BLOCK_DEFAULT_HEIGHT,
                 x: props.x ?? TM_FB_BLOCK_DEFAULT_X,
                 y: props.y ?? TM_FB_BLOCK_DEFAULT_Y
             }),
+            ports: props.ports ?? [],
             dragging: false
+        };
+
+        this.state = {
+            ...this.state,
+            ports: FlowchartBlock.generateDefaultPorts(this)
         };
     }
 
@@ -279,7 +330,6 @@ export default class FlowchartBlock extends React.Component<
                     data-y={this.state.transform.y}
                     className="tm-fb-block"
                     style={{
-                        position: "absolute",
                         width: this.state.transform.width * TM_FB_CANVAS_UNIT,
                         height: this.state.transform.height * TM_FB_CANVAS_UNIT,
                         top: `${top}px`,
@@ -287,10 +337,30 @@ export default class FlowchartBlock extends React.Component<
                         cursor: (this.state.dragging) ? "move" : "initial"
                     }}
                 >
-                    {this.props.children}
+                    {this.renderPorts()}
+                    <div>{this.props.children}</div>
                 </div>;
             }
         }</FlowchartBuilderCanvasContext.Consumer>;
+    }
+
+    /**
+     * Renders the ports of the block.
+     *
+     * @returns A fragment containing position-absolute ports.
+     */
+    renderPorts() : JSX.Element {
+        return <Fragment>
+            {this.state.ports.map((portProps) => <FlowchartBlockPort
+                direction={portProps.direction}
+                side={portProps.side}
+                sidePosition={portProps.sidePosition}
+                block={portProps.block}
+                color={portProps.color && portProps.color}
+            >
+                {portProps.children}
+            </FlowchartBlockPort>)}
+        </Fragment>;
     }
 
 }
