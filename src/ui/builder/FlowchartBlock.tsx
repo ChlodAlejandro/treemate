@@ -9,6 +9,8 @@ import {
 } from "../../Constants";
 import FlowchartBlockPort, {FlowchartBlockPortProps} from "./FlowchartBlockPort";
 
+type FlowchartBlockElement = HTMLElement & { FlowchartBlock : FlowchartBlock };
+
 /**
  * The FlowchartBlockTransform handles the flowchart's transforms, i.e.
  * its width, height, flowchart X-coordinate, and flowchart Y-coordinate.
@@ -100,7 +102,6 @@ class FlowchartBlockTransform {
         this._y = value;
         return this;
     }
-
 }
 
 /**
@@ -162,12 +163,16 @@ class FlowchartBlockTransformHandler {
                 const mouseRelativeX = event.clientX - canvasRect.left;
                 const mouseRelativeY = event.clientY - canvasRect.top;
 
-                const actualPosition = this.canvas.translatePosition(mouseRelativeX, mouseRelativeY);
+                const mouseTargetPosition = this.canvas.translatePosition(mouseRelativeX, mouseRelativeY);
+                const actualPosition = {
+                    x: mouseTargetPosition.x - this.clickRelativeX,
+                    y: mouseTargetPosition.y - this.clickRelativeY
+                };
 
                 if (actualPosition.x !== this.transform.x || actualPosition.y !== this.transform.y) {
                     this.updateLocation(
-                        actualPosition.x - this.clickRelativeX,
-                        actualPosition.y - this.clickRelativeY
+                        actualPosition.x,
+                        actualPosition.y
                     );
                 }
             }
@@ -229,7 +234,7 @@ export default class FlowchartBlock extends React.Component<
     /** The movement handler responsible for this block. */
     transformHandler : FlowchartBlockTransformHandler;
     /** The rendered block element. */
-    element : HTMLElement;
+    element : FlowchartBlockElement;
 
     /** @returns The width of the block in pixels */
     get actualWidth() : number {
@@ -305,6 +310,7 @@ export default class FlowchartBlock extends React.Component<
 
         this.trackingId = null;
         this.element.removeAttribute("id");
+        this.element.FlowchartBlock = this;
     }
 
     /**
@@ -351,7 +357,8 @@ export default class FlowchartBlock extends React.Component<
      */
     renderPorts() : JSX.Element {
         return <Fragment>
-            {this.state.ports.map((portProps) => <FlowchartBlockPort
+            {this.state.ports.map((portProps, index) => <FlowchartBlockPort
+                key={index}
                 direction={portProps.direction}
                 side={portProps.side}
                 sidePosition={portProps.sidePosition}
