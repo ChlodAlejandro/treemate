@@ -1,7 +1,7 @@
 ![Treemate banner](https://raw.githubusercontent.com/ChlodAlejandro/treemate/master/.github/RESOURCES/treemate-banner.png)
 
 ----
-Treemate is a basic flowchart builder made with React. Yes, the name is a pun on `teamate` and `tree`. Also yes, this is a ripoff of [LlamaLab's Automate's](https://llamalab.com/automate) flowchart design.
+Treemate is a basic flowchart builder made with React. Yes, the name is a pun on `teammate` and `tree`. Also yes, this is a ripoff of [LlamaLab's Automate's](https://llamalab.com/automate) flowchart design.
 
 **Highly in-development. The latest commit may not be working.**
 
