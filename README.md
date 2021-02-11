@@ -10,7 +10,7 @@ As of now, Treemate is extremely in-development and doesn't have primary feature
 
 1. Clone the repository.
 ```shell
-git clone https://github.com/ChlodAlejandro/memex.git
+git clone https://github.com/ChlodAlejandro/treemate.git
 ```
 2. Install npm packages.
 ```shell
